@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Carrito de Compras</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { 
+      background-color: #f9f9f9; 
+    }
+    .cart-box { 
+      background: white; 
+      border-radius: 10px; 
+      padding: 20px; 
+      margin-bottom: 20px; 
+    }
+    .cart-img { 
+      width: 80px;
+      height: auto; 
+      border-radius: 8px; 
+    }
+    .summary-box { 
+      background: white; 
+      border-radius: 10px;
+      padding: 20px; 
+    }
+    .btn-yellow { 
+      background-color: #ffc107; 
+      color: black; 
+      font-weight: bold; 
+    }
+    .btn-yellow:hover { 
+      background-color: #e0a800; 
+    }
+    nav{
+      height: -100px;
+      width: -100px;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <nav class="navbar navbar-dark bg-dark px-3">
+    <a href="index.html"><img class="navbar-brand" src="final final final.png" alt="" width="200" height="110" ></a>
+    <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel">Pozzi Racing</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="carrito.html">carrito</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Productos
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark">
+              <li><a class="dropdown-item" href="productos.html">Escapes GRS</a></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item" href="arandelas.html">Arandelas</a></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item" href="estirac.html">Estira Cadena</a>
+              </li>
+               <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item" href="levaf.html">Leva De Freno</a>
+              </li>
+              
+            </ul>
+          </li>
+        </ul>
+        <form class="d-flex mt-3" role="search">
+          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-success" type="submit">Search</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-4">
+    <div class="row">
+      <!-- Productos -->
+      <div class="col-lg-8">
+        <h3 class="mb-3">Tu carrito</h3>
+        <div id="cart-items"></div>
+      </div>
+
+      <!-- Resumen -->
+      <div class="col-lg-4">
+        <div class="summary-box">
+          <h5 class="fw-bold">Resumen de la compra</h5>
+          <p>Producto: $ <span id="subtotal">0,00</span></p>
+          <p>Envío: <span class="text-success">GRATIS</span></p>
+          <hr>
+          <h5>Total: $ <span id="total">0,00</span></h5>
+          <button class="btn btn-yellow w-100 mt-3" onclick="enviarWhatsApp()">Finalizar compra</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function getCart() {
+      return JSON.parse(localStorage.getItem("cart")) || [];
+    }
+
+    function saveCart(cart) {
+      localStorage.setItem("cart", JSON.stringify(cart));
+    }
+
+    function changeQty(id, action) {
+      let cart = getCart();
+      const item = cart.find(p => p.id === id);
+      if (!item) return;
+
+      if (action === 'inc') item.qty++;
+      if (action === 'dec' && item.qty > 1) item.qty--;
+
+      saveCart(cart);
+      renderCart();
+    }
+
+    function removeItem(id) {
+      let cart = getCart().filter(p => p.id !== id);
+      saveCart(cart);
+      renderCart();
+    }
+
+    function renderCart() {
+      let cart = getCart();
+      const container = document.getElementById("cart-items");
+      container.innerHTML = "";
+      let subtotal = 0;
+
+      if (cart.length === 0) {
+        container.innerHTML = `<p class="text-muted">Tu carrito está vacío 🛒</p>`;
+      }
+
+      cart.forEach(item => {
+        subtotal += item.price * item.qty;
+
+        container.innerHTML += `
+          <div class="cart-box d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+              <img src="${item.img}" class="cart-img me-3" alt="${item.name}">
+              <div>
+                <h6>${item.name}</h6>
+                <small>Color: ${item.color}</small><br>
+                <a href="#" onclick="removeItem(${item.id})" class="text-danger">Eliminar</a>
+              </div>
+            </div>
+            <div>
+              <button class="btn btn-sm btn-outline-secondary" onclick="changeQty(${item.id}, 'dec')">-</button>
+              <span class="mx-2">${item.qty}</span>
+              <button class="btn btn-sm btn-outline-secondary" onclick="changeQty(${item.id}, 'inc')">+</button>
+              <p class="mt-2 fw-bold">$ ${(item.price * item.qty).toLocaleString()}</p>
+            </div>
+          </div>
+        `;
+      });
+
+      document.getElementById("subtotal").innerText = subtotal.toLocaleString();
+      document.getElementById("total").innerText = subtotal.toLocaleString();
+      document.getElementById("cart-count").innerText = `🛒 (${cart.length})`;
+    }
+
+    // Render al cargar la página
+    renderCart();
+
+
+    function enviarWhatsApp() {
+    let cart = getCart();
+    if (cart.length === 0) {
+      alert("Tu carrito está vacío 🛒");
+      return;
+    }
+
+    let numero = "5493564358678"; // 👉 poné tu número acá (sin + ni espacios)
+    let mensaje = "Hola!%20Quiero%20comprar:%0A";
+
+    let total = 0;
+    cart.forEach(item => {
+      let subtotal = item.price * item.qty;
+      mensaje += "- " + item.name + " (x" + item.qty + ") $" + subtotal.toLocaleString() + "%0A";
+      total += subtotal;
+    });
+
+    mensaje += "%0ATotal:%20$" + total.toLocaleString();
+
+    let url = "https://wa.me/" + numero + "?text=" + mensaje;
+    window.open(url, "_blank");
+}
+
+  </script>
+
+</body>
+</html>
+
